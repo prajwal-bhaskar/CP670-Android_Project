@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:clickable="true"
     android:padding="16dp">
 
     <ImageView
@@ -22,6 +23,7 @@
         android:textStyle="bold"
         android:textColor="@android:color/black"
         android:layout_marginBottom="8dp"
+        android:clickable="true"
         android:text="Event Title" />
 
     <TextView
@@ -41,4 +43,17 @@
         android:textSize="20sp"
         android:textColor="@android:color/black"
         android:text="Event Description" />
+    <Button
+        android:id="@+id/joinButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/eventImageView"
+        android:text="Join" />
+    <Button
+        android:id="@+id/favoriteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/favourites"
+        android:layout_toRightOf="@id/joinButton"
+        android:text="Favorite" />
 </LinearLayout>
