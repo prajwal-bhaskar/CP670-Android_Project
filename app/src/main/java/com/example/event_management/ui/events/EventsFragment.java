@@ -2,6 +2,7 @@ package com.example.event_management.ui.events;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.event_management.Event;
 import com.example.event_management.R;
-import com.example.event_management.databinding.FragmentEventsBinding;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EventsFragment extends Fragment {
 
-    private FragmentEventsBinding binding;
     private EventViewModel eventViewModel;
+    private EventAdapter eventAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,7 +30,10 @@ public class EventsFragment extends Fragment {
         eventViewModel.getEventsLiveData().observe(this, events -> {
             // Update your UI with the updated events list
             // You may need to call notifyDataSetChanged() on the adapter
-        });
+
+            // Assuming eventAdapter is the reference to your EventAdapter
+            eventAdapter.setEvents(events);
+    });
     }
 
     @Override
@@ -48,7 +50,19 @@ public class EventsFragment extends Fragment {
                 startActivity(intent);
             }
         };
-        EventAdapter eventAdapter = new EventAdapter(getEventData(), onItemClickListener);
+
+        // Use the actual data retrieval logic to get the events
+
+        // Instantiate EventAdapter with the actual data
+        eventAdapter = new EventAdapter( onItemClickListener);
+
+        // Observe changes to the LiveData
+        eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), updatedEvents -> {
+            // Update the UI when the LiveData changes
+
+            eventAdapter.setEvents(updatedEvents);
+            eventAdapter.notifyDataSetChanged();  // Notify the adapter when data changes
+        });
 
         recyclerView.setAdapter(eventAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -56,19 +70,8 @@ public class EventsFragment extends Fragment {
         return view;
     }
 
-    // Replace this method with your data retrieval logic
-    public List<Event> getEventData() {
-        List<Event> events = new ArrayList<>();
-        events.add(new Event("Event 1", "2023-11-01", "Description of Event 1",R.drawable.download));
-        events.add(new Event("Event 2", "2023-11-10", "Description of Event 2",R.drawable.download));
-        events.add(new Event("Event 3", "2023-11-20", "Description of Event 3",R.drawable.download));
-        return events;
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
     }
-
 }

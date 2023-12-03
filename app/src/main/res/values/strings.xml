@@ -16,4 +16,6 @@
     <string name="title_favourites">Favourites</string>
     <string name="title_profile">Profile</string>
     <string name="search_String">Search for events</string>
+    <string name="calendar_search">Calendar</string>
+    <string name="search">Search for events</string>
 </resources>

@@ -54,7 +54,7 @@ public class FavouritesFragment extends Fragment {
             }
         };
 
-        EventAdapter eventAdapter = new EventAdapter(getEventData(), onItemClickListener);
+        EventAdapter eventAdapter = new EventAdapter(onItemClickListener);
         favoritesRecyclerView.setAdapter(eventAdapter);
         favoritesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

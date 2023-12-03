@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.example.event_management.ui.events.EventViewModel;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,21 +17,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
-    public  List<Event> events;
-    private EventViewModel eventViewModel;
-    public  OnItemClickListener onItemClickListener;
+
+    private List<Event> events;
+    private OnItemClickListener onItemClickListener;
+
     public interface OnItemClickListener {
         void onItemClick(Event event);
     }
 
-    public EventAdapter(List<Event> events, OnItemClickListener onItemClickListener) {
-        this.events = events;
+    public EventAdapter(OnItemClickListener onItemClickListener) {
+        this.events = new ArrayList<>();
         this.onItemClickListener = onItemClickListener;
     }
 
+    public void setEvents(List<Event> events) {
+        this.events.clear();
+        this.events.addAll(events);
+        notifyDataSetChanged();
+    }
 
     @NonNull
-
+    @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.event_item, parent, false);
@@ -46,66 +52,36 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.eventDateTextView.setText(event.getDate());
         holder.eventDescriptionTextView.setText(event.getDescription());
         holder.eventImageView.setImageResource(event.getImageResource());
+
         // Check if the event is joined or favorited and update UI accordingly
         if (event.isJoined()) {
-            // Event is joined, update UI accordingly
             holder.joinButton.setText("Leave");
         } else {
-            // Event is not joined, update UI accordingly
             holder.joinButton.setText("Join");
         }
 
-        // Check if the event is favorited or not and update UI accordingly
         if (event.isFavorited()) {
-            // Event is favorited, update UI accordingly
             holder.favoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_fav_light, 0, 0, 0);
         } else {
-            // Event is not favorited, update UI accordingly
             holder.favoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_fav_dark, 0, 0, 0);
         }
 
         holder.joinButton.setOnClickListener(v -> {
-            // Toggle the join state and update UI
             event.setJoined(!event.isJoined());
             notifyItemChanged(position);
-            if (eventViewModel != null) {
-                List<Event> updatedEvents = new ArrayList<>(events);
-                updatedEvents.set(position, event);
-                eventViewModel.setEvents(updatedEvents);
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(event);
             }
         });
 
         holder.favoriteButton.setOnClickListener(v -> {
-            // Toggle the favorite state and update UI
             event.setFavorited(!event.isFavorited());
             notifyItemChanged(position);
-            if (eventViewModel != null) {
-                List<Event> updatedEvents = new ArrayList<>(events);
-                updatedEvents.set(position, event);
-                eventViewModel.setEvents(updatedEvents);
-            }
-
-            // Optionally, add the event to the favorites tab
-            if (event.isFavorited()) {
-                // Add to favorites logic
-            } else {
-                // Remove from favorites logic
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(event);
             }
         });
-
     }
-    private void updateEventInViewModel(Event event) {
-        List<Event> updatedEvents = new ArrayList<>(events);
-        int index = updatedEvents.indexOf(event);
-        if (index != -1) {
-            updatedEvents.set(index, event);
-            if (eventViewModel != null) {
-                eventViewModel.setEvents(updatedEvents);
-            }
-
-        }
-    }
-
 
     @Override
     public int getItemCount() {
@@ -113,10 +89,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     }
 
     public class EventViewHolder extends RecyclerView.ViewHolder {
+
         public TextView eventTitleTextView;
         public TextView eventDateTextView;
         public TextView eventDescriptionTextView;
-
         private final ImageView eventImageView;
         public Button joinButton;
         public Button favoriteButton;
@@ -135,14 +111,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             });
             joinButton = itemView.findViewById(R.id.joinButton);
             favoriteButton = itemView.findViewById(R.id.favoriteButton);
-
         }
-
-
-
-
     }
-
-
 }
-
