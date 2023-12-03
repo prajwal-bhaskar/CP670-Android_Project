@@ -48,6 +48,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("com.google.android.gms:play-services-base:18.2.0")
     implementation("com.facebook.android:facebook-login:14.0.0")
+    implementation("com.google.firebase:firebase-database:20.0.0")
+    implementation ("com.google.firebase:firebase-storage:20.0.0")
 
 
     androidTestImplementation("androidx.test:runner:1.4.0")
