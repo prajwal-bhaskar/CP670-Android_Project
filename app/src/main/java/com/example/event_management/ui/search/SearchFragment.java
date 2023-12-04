@@ -127,7 +127,7 @@ public class SearchFragment extends Fragment {
         }
 
         // Notify the adapter that the data set has changed
-        eventViewModel.setEvents(filteredEvents);
+        //eventViewModel.setEvents(filteredEvents);
     }
 
     @Override

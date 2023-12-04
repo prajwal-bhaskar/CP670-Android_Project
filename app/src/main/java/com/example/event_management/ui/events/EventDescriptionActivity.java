@@ -31,7 +31,8 @@ public class EventDescriptionActivity extends AppCompatActivity implements Event
                 String eventTitle = event.getTitle();
                 String eventDate = event.getDate();
                 String eventDescription = event.getDescription();
-                int imageResource = event.getImageResource();
+
+                //int imageResource = event.getImageResource();
 
                 // Set the title to the event title
                 getSupportActionBar().setTitle(eventTitle);
@@ -40,12 +41,13 @@ public class EventDescriptionActivity extends AppCompatActivity implements Event
                 TextView titleTextView = findViewById(R.id.titleTextView);
                 TextView dateTextView = findViewById(R.id.dateTextView);
                 TextView descriptionTextView = findViewById(R.id.descriptionTextView);
+
                 ImageView eventImageView = findViewById(R.id.eventImageView);
 
                 titleTextView.setText(eventTitle);
                 dateTextView.setText(eventDate);
                 descriptionTextView.setText(eventDescription);
-                eventImageView.setImageResource(imageResource);
+                //eventImageView.setImageResource(imageResource);
             }
         }
     }

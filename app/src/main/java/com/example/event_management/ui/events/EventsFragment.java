@@ -2,19 +2,28 @@ package com.example.event_management.ui.events;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.event_management.Event;
+import com.example.event_management.EventBookingActivity;
 import com.example.event_management.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
@@ -27,13 +36,7 @@ public class EventsFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         eventViewModel = new ViewModelProvider(requireActivity()).get(EventViewModel.class);
-        eventViewModel.getEventsLiveData().observe(this, events -> {
-            // Update your UI with the updated events list
-            // You may need to call notifyDataSetChanged() on the adapter
-
-            // Assuming eventAdapter is the reference to your EventAdapter
-            eventAdapter.setEvents(events);
-    });
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -41,37 +44,61 @@ public class EventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
 
         RecyclerView recyclerView = view.findViewById(R.id.eventsRecyclerView);
-        EventAdapter.OnItemClickListener onItemClickListener = new EventAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Event event) {
-                // Handle item click here
-                Intent intent = new Intent(getContext(), EventDescriptionActivity.class);
-                intent.putExtra("EVENT", event);
-                startActivity(intent);
-            }
+
+        EventAdapter.OnItemClickListener onItemClickListener = event -> {
+            // Handle item click here
+            Intent intent = new Intent(getContext(), EventDescriptionActivity.class);
+            intent.putExtra("EVENT", event);
+            startActivity(intent);
         };
 
-        // Use the actual data retrieval logic to get the events
-
-        // Instantiate EventAdapter with the actual data
-        eventAdapter = new EventAdapter( onItemClickListener);
-
-        // Observe changes to the LiveData
-        eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), updatedEvents -> {
-            // Update the UI when the LiveData changes
-
-            eventAdapter.setEvents(updatedEvents);
-            eventAdapter.notifyDataSetChanged();  // Notify the adapter when data changes
-        });
+        eventAdapter = new EventAdapter(onItemClickListener);
 
         recyclerView.setAdapter(eventAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // Observe changes to the LiveData and update the UI when data changes
+        eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), new Observer<List<Event>>() {
+            @Override
+            public void onChanged(List<Event> updatedEvents) {
+                eventAdapter.setEvents(updatedEvents);
+                eventAdapter.notifyDataSetChanged();  // Notify the adapter when data changes
+            }
+        });
+
+
+
+
+        // Here, you should retrieve events from Firebase or another data source and set them in the ViewModel
+        // Example: eventViewModel.setEvents(yourEventList);
+
+
+        // You can also handle errors or empty data
+        //if (eventViewModel.getEventsLiveData().getValue() == null || eventViewModel.getEventsLiveData().getValue().isEmpty()) {
+            //Toast.makeText(requireContext(), "No events found.", Toast.LENGTH_SHORT).show();
+        //}
+
+
+
         return view;
+    }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_events, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_post) {
+            navigateToEventBooking();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    private void navigateToEventBooking() {
+        // Logic to navigate to Event Booking Activity
+        Intent intent = new Intent(getActivity(), EventBookingActivity.class);
+        startActivity(intent);
     }
 }

@@ -1,5 +1,5 @@
 package com.example.event_management.ui.events;
-
+import com.bumptech.glide.Glide;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +51,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.eventTitleTextView.setText(event.getTitle());
         holder.eventDateTextView.setText(event.getDate());
         holder.eventDescriptionTextView.setText(event.getDescription());
-        holder.eventImageView.setImageResource(event.getImageResource());
+        holder.eventTimeTextView.setText(event.getTime());
+        holder.eventMaxAttendeesTextView.setText(String.valueOf(event.getMaxAttendees()));
+        Glide.with(holder.itemView.getContext())
+                .load(event.getImageUrl())
+                .into(holder.eventImageView);
 
         // Check if the event is joined or favorited and update UI accordingly
         if (event.isJoined()) {
@@ -93,6 +97,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         public TextView eventTitleTextView;
         public TextView eventDateTextView;
         public TextView eventDescriptionTextView;
+        public TextView eventTimeTextView;
+        public TextView eventMaxAttendeesTextView;
         private final ImageView eventImageView;
         public Button joinButton;
         public Button favoriteButton;
@@ -103,12 +109,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             eventDateTextView = itemView.findViewById(R.id.dateTextView);
             eventDescriptionTextView = itemView.findViewById(R.id.descriptionTextView);
             eventImageView = itemView.findViewById(R.id.eventImage);
+            eventTimeTextView = itemView.findViewById(R.id.timeTextView);
+            eventMaxAttendeesTextView = itemView.findViewById(R.id.maxAttendeesTextView);
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && onItemClickListener != null) {
                     onItemClickListener.onItemClick(events.get(position));
                 }
             });
+
             joinButton = itemView.findViewById(R.id.joinButton);
             favoriteButton = itemView.findViewById(R.id.favoriteButton);
         }
