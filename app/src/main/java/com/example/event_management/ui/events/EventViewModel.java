@@ -8,7 +8,7 @@ import com.example.event_management.Event;
 import java.util.List;
 
 public class EventViewModel extends ViewModel {
-    private MutableLiveData<List<Event>> eventsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<Event>> eventsLiveData = new MutableLiveData<>();
 
     public LiveData<List<Event>> getEventsLiveData() {
         return eventsLiveData;

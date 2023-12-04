@@ -10,15 +10,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.event_management.Event;
 import com.example.event_management.R;
+import com.example.event_management.ui.events.EventAdapter;
 
 import java.util.List;
 
 public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder> {
 
     private List<Event> favoriteEvents;
+    private OnItemClickListener onItemClickListener;
+    public interface OnItemClickListener {
+        void onItemClick(Event event);
+    }
 
-    public FavoriteAdapter(List<Event> favoriteEvents) {
+    public FavoriteAdapter(List<Event> favoriteEvents,OnItemClickListener onItemClickListener) {
         this.favoriteEvents = favoriteEvents;
+        this.onItemClickListener = onItemClickListener;
+
     }
 
     @NonNull
@@ -30,16 +37,25 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.Favori
 
     @Override
     public void onBindViewHolder(@NonNull FavoriteViewHolder holder, int position) {
-        Event event = favoriteEvents.get(position);
+        if (favoriteEvents != null && position < favoriteEvents.size()) {
+            Event event = favoriteEvents.get(position);
+            holder.titleTextView.setText(event.getTitle());
+            holder.dateTextView.setText(event.getDate());
+            // Add other UI updates as needed
 
-        holder.titleTextView.setText(event.getTitle());
-        holder.dateTextView.setText(event.getDate());
-        // Add other UI updates as needed
+            // Set click listener
+            holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(event));
+        }
     }
 
     @Override
     public int getItemCount() {
-        return favoriteEvents.size();
+
+        return favoriteEvents != null ? favoriteEvents.size() : 0;
+    }
+    public void setFavorites(List<Event> favoriteEvents) {
+        this.favoriteEvents = favoriteEvents;
+        notifyDataSetChanged();
     }
 
     public static class FavoriteViewHolder extends RecyclerView.ViewHolder {
@@ -54,5 +70,6 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.Favori
             // Initialize other UI elements as needed
         }
     }
-}
 
+
+}

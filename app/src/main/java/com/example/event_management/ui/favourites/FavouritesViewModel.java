@@ -4,16 +4,18 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.event_management.Event;
+
+import java.util.List;
+
 public class FavouritesViewModel extends ViewModel {
+    private MutableLiveData<List<Event>> favoriteEventsLiveData = new MutableLiveData<>();
 
-    private final MutableLiveData<String> mText;
-
-    public FavouritesViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("Favourite events will be saved here");
+    public LiveData<List<Event>> getFavoriteEventsLiveData() {
+        return favoriteEventsLiveData;
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public void setFavoriteEvents(List<Event> favoriteEvents) {
+        favoriteEventsLiveData.setValue(favoriteEvents);
     }
 }
