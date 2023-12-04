@@ -15,11 +15,10 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.event_management.Event;
 import com.example.event_management.EventBookingActivity;
 import com.example.event_management.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.example.event_management.databinding.FragmentEventsBinding;
 import com.example.event_management.ui.favourites.FavoriteAdapter;
 import com.example.event_management.ui.favourites.FavouritesViewModel;
@@ -35,7 +34,6 @@ public class EventsFragment extends Fragment {
     private EventAdapter eventAdapter;
     private FavoriteAdapter favoriteAdapter;
     private FavoriteAdapter.OnItemClickListener onItemClickListener;
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,8 +56,7 @@ public class EventsFragment extends Fragment {
                 startActivity(intent);
             }
         };
-        eventAdapter = new EventAdapter(eventViewModel, onItemClickListener, favoriteAdapter);
-
+        eventAdapter = new EventAdapter(new ArrayList<Event>(), eventViewModel ,onItemClickListener, favoriteAdapter);
 
         recyclerView.setAdapter(eventAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -73,17 +70,6 @@ public class EventsFragment extends Fragment {
             }
         });
 
-
-        // Here, you should retrieve events from Firebase or another data source and set them in the ViewModel
-        // Example: eventViewModel.setEvents(yourEventList);
-
-
-        // You can also handle errors or empty data
-        //if (eventViewModel.getEventsLiveData().getValue() == null || eventViewModel.getEventsLiveData().getValue().isEmpty()) {
-        //Toast.makeText(requireContext(), "No events found.", Toast.LENGTH_SHORT).show();
-        //}
-
-
         return view;
     }
 
@@ -91,29 +77,27 @@ public class EventsFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_events, menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
 
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item){
-            if (item.getItemId() == R.id.action_post) {
-                navigateToEventBooking();
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_post) {
+            navigateToEventBooking();
+            return true;
         }
-        private void navigateToEventBooking () {
-            // Logic to navigate to Event Booking Activity
-            Intent intent = new Intent(getActivity(), EventBookingActivity.class);
-            startActivity(intent);
-        }
+        return super.onOptionsItemSelected(item);
+    }
 
-        private void observeEvents () {
-            eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), allEvents -> {
-                eventAdapter.setEvents(allEvents);
-                // You may need to call notifyDataSetChanged() on the adapter
-            });
-        }
+    private void navigateToEventBooking() {
+        // Logic to navigate to Event Booking Activity
+        Intent intent = new Intent(getActivity(), EventBookingActivity.class);
+        startActivity(intent);
+    }
 
-
+    private void observeEvents() {
+        eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), allEvents -> {
+            eventAdapter.setEvents(allEvents);
+            // You may need to call notifyDataSetChanged() on the adapter
+        });
     }
 }

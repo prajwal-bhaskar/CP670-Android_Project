@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Event_Management</string>
+    <string name="app_name">CanaConnect</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>

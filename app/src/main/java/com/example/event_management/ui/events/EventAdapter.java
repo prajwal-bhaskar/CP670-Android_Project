@@ -1,17 +1,16 @@
 package com.example.event_management.ui.events;
-import android.content.Intent;
-import com.bumptech.glide.Glide;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.example.event_management.ui.events.EventViewModel;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.event_management.Event;
 import com.example.event_management.R;
 import com.example.event_management.ui.favourites.FavoriteAdapter;
@@ -20,12 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
-    private    List<Event> events;
+    private static List<Event> events;
     private List<Event> favoriteEvents;
 
-    private EventViewModel eventViewModel;
-    private OnItemClickListener onItemClickListener;
-    private FavoriteAdapter favoriteAdapter;
+    private final EventViewModel eventViewModel;
+    private static OnItemClickListener onItemClickListener;
+    private final FavoriteAdapter favoriteAdapter;
 
     public interface OnItemClickListener {
         void onItemClick(Event event);
@@ -38,13 +37,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         this.onItemClickListener = onItemClickListener;
         this.favoriteAdapter = favoriteAdapter;
     }
-
-    public void setEvents(List<Event> events) {
-        this.events.clear();
-        this.events.addAll(events);
-        notifyDataSetChanged();
-    }
-
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -62,9 +54,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.eventDescriptionTextView.setText(event.getDescription());
         holder.eventTimeTextView.setText(event.getTime());
         holder.eventMaxAttendeesTextView.setText(String.valueOf(event.getMaxAttendees()));
-        Glide.with(holder.itemView.getContext())
-                .load(event.getImageUrl())
-                .into(holder.eventImageView);
+        if (event.getImageUrl() != null) {
+            Glide.with(holder.itemView.getContext())
+                    .load(event.getImageUrl())
+                    .into(holder.eventImageView);
+        }
 
         // Check if the event is joined or favorited and update UI accordingly
         if (event.isJoined()) {
@@ -99,15 +93,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             // Toggle the favorite state and update UI
             event.setFavorited(!event.isFavorited());
             notifyItemChanged(position);
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClick(event);
-            updateEventInViewModel(event);
+            if (eventViewModel != null) {
+                List<Event> updatedEvents = new ArrayList<>(events);
+                updatedEvents.set(position, event);
+                eventViewModel.setEvents(updatedEvents);
+            }
+           // if (onItemClickListener != null) {
+             //   onItemClickListener.onItemClick(event);
+            //updateEventInViewModel(event);
+            //}
 
             // Optionally, add the event to the favorites tab
             if (event.isFavorited()) {
-                addToFavorites(event);
+                addToFavorites(position,event);
             } else {
-                removeFromFavorites(event);
+                removeFromFavorites(position,event);
             }
         });
 
@@ -119,15 +119,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         }
 
+    private void removeFromFavorites(int position, Event event) {
+    }
+
+    private void addToFavorites(int position, Event event) {
+    }
+
     @Override
     public int getItemCount() {
         return events.size();
     }
     public void setEvents(List<Event> events) {
-        this.events = events;
+        EventAdapter.events.clear();
+        EventAdapter.events.addAll(events);
         notifyDataSetChanged();
     }
-
 
     public static class EventViewHolder extends RecyclerView.ViewHolder {
         public TextView eventTitleTextView;
@@ -195,4 +201,5 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         }
     }
 
-        }
+  }
+

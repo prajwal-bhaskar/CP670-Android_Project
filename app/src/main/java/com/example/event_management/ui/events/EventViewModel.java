@@ -21,6 +21,6 @@ public class EventViewModel extends ViewModel {
     }
 
     public void setEvents(List<Event> events) {
-        eventsLiveData.setValue(events);
+        eventsLiveData.getValue();
     }
 }
