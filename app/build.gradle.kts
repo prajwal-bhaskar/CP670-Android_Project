@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -36,9 +37,22 @@ android {
 
 dependencies {
 
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+
+    // Firebase Authentication
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore:24.9.1")
+    implementation("com.google.firebase:firebase-storage")
 
 
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
+    implementation("com.google.firebase:firebase-database:20.3.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+    implementation("com.google.firebase:firebase-analytics")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.navigation:navigation-fragment:2.7.4")
     implementation("androidx.navigation:navigation-ui:2.7.4")

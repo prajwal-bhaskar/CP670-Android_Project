@@ -1,5 +1,6 @@
 package com.example.event_management.ui.events;
 import android.content.Intent;
+import com.bumptech.glide.Glide;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.example.event_management.ui.events.EventViewModel;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,21 +32,26 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     }
 
     public EventAdapter(List<Event> events, EventViewModel eventViewModel, OnItemClickListener onItemClickListener, FavoriteAdapter favoriteAdapter) {
-        this.events = events;
+            this.events = new ArrayList<>();
         this.favoriteEvents = favoriteEvents!= null ? favoriteEvents : new ArrayList<>(); // Add this line
         this.eventViewModel = eventViewModel;
         this.onItemClickListener = onItemClickListener;
         this.favoriteAdapter = favoriteAdapter;
     }
 
-    @NonNull
+    public void setEvents(List<Event> events) {
+        this.events.clear();
+        this.events.addAll(events);
+        notifyDataSetChanged();
+    }
 
+    @NonNull
+    @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.event_item, parent, false);
         return new EventViewHolder(view);
     }
-
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
@@ -53,7 +60,12 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.eventTitleTextView.setText(event.getTitle());
         holder.eventDateTextView.setText(event.getDate());
         holder.eventDescriptionTextView.setText(event.getDescription());
-        holder.eventImageView.setImageResource(event.getImageResource());
+        holder.eventTimeTextView.setText(event.getTime());
+        holder.eventMaxAttendeesTextView.setText(String.valueOf(event.getMaxAttendees()));
+        Glide.with(holder.itemView.getContext())
+                .load(event.getImageUrl())
+                .into(holder.eventImageView);
+
         // Check if the event is joined or favorited and update UI accordingly
         if (event.isJoined()) {
             // Event is joined, update UI accordingly
@@ -76,13 +88,19 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             // Toggle the join state and update UI
             event.setJoined(!event.isJoined());
             notifyItemChanged(position);
-            updateEventInViewModel(event);
+            if (eventViewModel != null) {
+                List<Event> updatedEvents = new ArrayList<>(events);
+                updatedEvents.set(position, event);
+                eventViewModel.setEvents(updatedEvents);
+            }
         });
 
         holder.favoriteButton.setOnClickListener(v -> {
             // Toggle the favorite state and update UI
             event.setFavorited(!event.isFavorited());
             notifyItemChanged(position);
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(event);
             updateEventInViewModel(event);
 
             // Optionally, add the event to the favorites tab
@@ -92,13 +110,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 removeFromFavorites(event);
             }
         });
+
         holder.itemView.setOnClickListener(v -> {
             if (onItemClickListener != null) {
                 onItemClickListener.onItemClick(event);
             }
         });
 
-    }
+        }
+
     @Override
     public int getItemCount() {
         return events.size();
@@ -113,6 +133,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         public TextView eventTitleTextView;
         public TextView eventDateTextView;
         public TextView eventDescriptionTextView;
+        public TextView eventTimeTextView;
+        public TextView eventMaxAttendeesTextView;
         private final ImageView eventImageView;
         public Button joinButton;
         public Button favoriteButton;
@@ -124,6 +146,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             eventDateTextView = itemView.findViewById(R.id.dateTextView);
             eventDescriptionTextView = itemView.findViewById(R.id.descriptionTextView);
             eventImageView = itemView.findViewById(R.id.eventImage);
+            eventTimeTextView = itemView.findViewById(R.id.timeTextView);
+            eventMaxAttendeesTextView = itemView.findViewById(R.id.maxAttendeesTextView);
+            itemView.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && onItemClickListener != null) {
+                    onItemClickListener.onItemClick(events.get(position));
+                }
+            });
+
             joinButton = itemView.findViewById(R.id.joinButton);
             favoriteButton = itemView.findViewById(R.id.favoriteButton);
 
@@ -164,5 +195,4 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         }
     }
 
-}
-
+        }

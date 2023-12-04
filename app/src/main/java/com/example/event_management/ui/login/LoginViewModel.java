@@ -1,4 +1,5 @@
 package com.example.event_management.ui.login;
+import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -10,11 +11,12 @@ import com.example.event_management.data.LoginRepository;
 import com.example.event_management.data.Result;
 import com.example.event_management.data.model.LoggedInUser;
 import com.example.event_management.R;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginViewModel extends ViewModel {
 
     private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
+    public MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
     private LoginRepository loginRepository;
 
     LoginViewModel(LoginRepository loginRepository) {
@@ -30,15 +32,17 @@ public class LoginViewModel extends ViewModel {
     }
 
     public void login(String username, String password) {
-        // can be launched in a separate asynchronous job
-        Result<LoggedInUser> result = loginRepository.login(username, password);
-
-        if (result instanceof Result.Success) {
-            LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-            loginResult.setValue(new LoginResult(new LoggedInUserView(data.getDisplayName())));
-        } else {
-            loginResult.setValue(new LoginResult(R.string.login_failed));
-        }
+        // Handle login with Firebase Authentication
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        mAuth.signInWithEmailAndPassword(username, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        loginResult.setValue(new LoginResult(new LoggedInUserView(user.getDisplayName())));
+                    } else {
+                        loginResult.setValue(new LoginResult(R.string.login_failed));
+                    }
+                });
     }
 
     public void loginDataChanged(String username, String password) {

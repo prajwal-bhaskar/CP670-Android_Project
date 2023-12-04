@@ -42,12 +42,22 @@ android:padding="16dp">
     android:layout_height="wrap_content"
     android:layout_below="@id/eventImageView"
     android:text="Join" />
-<Button
-    android:id="@+id/favoriteButton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:icon="@drawable/favourites"
-    android:layout_toRightOf="@id/joinButton"
-    android:text="Favorite" />
+
+    <Button
+        android:id="@+id/favoriteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/joinButton"
+        android:layout_alignEnd="@+id/joinButton"
+        android:layout_alignBottom="@+id/joinButton"
+        android:layout_marginStart="44dp"
+        android:layout_marginLeft="44dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="-143dp"
+        android:layout_marginBottom="0dp"
+        android:layout_toEndOf="@+id/joinButton"
+        android:layout_toRightOf="@id/joinButton"
+        android:icon="@drawable/favourites"
+        android:text="Favorite" />
 
 </RelativeLayout>

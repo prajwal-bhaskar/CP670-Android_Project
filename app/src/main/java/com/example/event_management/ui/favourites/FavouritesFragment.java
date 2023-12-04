@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.event_management.Event;
 import com.example.event_management.R;
 import com.example.event_management.databinding.FragmentFavouritesBinding;
@@ -21,10 +23,11 @@ import com.example.event_management.ui.events.EventViewModel;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class FavouritesFragment extends Fragment {
     private FragmentFavouritesBinding binding;
     private FavouritesViewModel favouritesViewModel;
-
+    private EventViewModel eventViewModel;
     private List<Event> favoriteEvents = new ArrayList<>();
     private FavoriteAdapter favoriteAdapter;
 
@@ -33,6 +36,7 @@ public class FavouritesFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
     }
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

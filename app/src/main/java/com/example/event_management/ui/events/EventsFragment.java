@@ -3,16 +3,23 @@ package com.example.event_management.ui.events;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import androidx.annotation.NonNull;
+
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.event_management.Event;
+import com.example.event_management.EventBookingActivity;
 import com.example.event_management.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.example.event_management.databinding.FragmentEventsBinding;
 import com.example.event_management.ui.favourites.FavoriteAdapter;
 import com.example.event_management.ui.favourites.FavouritesViewModel;
@@ -33,56 +40,80 @@ public class EventsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        eventViewModel = new ViewModelProvider(requireActivity()).get(EventViewModel.class);
+        setHasOptionsMenu(true);
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentEventsBinding.inflate(inflater, container, false);
-        View view = binding.getRoot();
-        eventViewModel = new ViewModelProvider(requireActivity()).get(EventViewModel.class);
-
-        // Initialize the EventAdapter with an empty list and an item click listener
-            EventAdapter.OnItemClickListener onItemClickListener = event -> {
-                Intent intent = new Intent(requireContext(), EventDescriptionActivity.class);
-                intent.putExtra("EVENT", event);
-                startActivity(intent);
-            };
-        eventAdapter = new EventAdapter(getEventData(),eventViewModel, onItemClickListener, favoriteAdapter);
-
-
-        // Observe changes in all events and update the EventAdapter
-        observeEvents();
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_events, container, false);
 
         RecyclerView recyclerView = view.findViewById(R.id.eventsRecyclerView);
+        EventAdapter.OnItemClickListener onItemClickListener = new EventAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Event event) {
+                // Handle item click here
+                Intent intent = new Intent(getContext(), EventDescriptionActivity.class);
+                intent.putExtra("EVENT", event);
+                startActivity(intent);
+            }
+        };
+        eventAdapter = new EventAdapter(eventViewModel, onItemClickListener, favoriteAdapter);
+
 
         recyclerView.setAdapter(eventAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // Observe changes to the LiveData and update the UI when data changes
+        eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), new Observer<List<Event>>() {
+            @Override
+            public void onChanged(List<Event> updatedEvents) {
+                eventAdapter.setEvents(updatedEvents);
+                eventAdapter.notifyDataSetChanged();  // Notify the adapter when data changes
+            }
+        });
+
+
+        // Here, you should retrieve events from Firebase or another data source and set them in the ViewModel
+        // Example: eventViewModel.setEvents(yourEventList);
+
+
+        // You can also handle errors or empty data
+        //if (eventViewModel.getEventsLiveData().getValue() == null || eventViewModel.getEventsLiveData().getValue().isEmpty()) {
+        //Toast.makeText(requireContext(), "No events found.", Toast.LENGTH_SHORT).show();
+        //}
+
+
         return view;
     }
 
-    private List<Event> getEventData() {
-        List<Event> events = new ArrayList<>();
-        events.add(new Event("Event 1", "2023-11-01", "Description of Event 1", R.drawable.download));
-        events.add(new Event("Event 2", "2023-11-10", "Description of Event 2", R.drawable.download));
-        events.add(new Event("Event 3", "2023-11-20", "Description of Event 3", R.drawable.download));
-        return events;
-    }
-
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_events, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item){
+            if (item.getItemId() == R.id.action_post) {
+                navigateToEventBooking();
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+        private void navigateToEventBooking () {
+            // Logic to navigate to Event Booking Activity
+            Intent intent = new Intent(getActivity(), EventBookingActivity.class);
+            startActivity(intent);
+        }
+
+        private void observeEvents () {
+            eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), allEvents -> {
+                eventAdapter.setEvents(allEvents);
+                // You may need to call notifyDataSetChanged() on the adapter
+            });
+        }
+
+
     }
-
-    private void observeEvents() {
-        eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), allEvents -> {
-            eventAdapter.setEvents(allEvents);
-            // You may need to call notifyDataSetChanged() on the adapter
-        });
-    }
-
-
 }

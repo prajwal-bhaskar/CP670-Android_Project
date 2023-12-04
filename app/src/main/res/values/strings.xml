@@ -3,11 +3,11 @@
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or Register</string>
+    <string name="action_sign_in">Sign In</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">"Welcome !"</string>
     <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_password">Password incorrect.</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_landing_page">LandingPage</string>
     <string name="title_events">Events</string>
@@ -16,4 +16,16 @@
     <string name="title_favourites">Favourites</string>
     <string name="title_profile">Profile</string>
     <string name="search_String">Search for events</string>
+    <string name="calendar_search">Calendar</string>
+    <string name="search">Search for events</string>
+    <string name="web_client_id">502279638756-m8i6cjk2q68noumgtmikhndjpae6g9bp.apps.googleusercontent.com</string>
+    <string name="action_sign_up">Sign Up</string>
+    <string name="sign_up_failed">Failed to SignUp</string>
+    <string name="prompt_name">Enter your Full Name</string>
+    <string name="prompt_dob">Enter your Date of Birth</string>
+    <string name="prompt_phone">Enter your phone number</string>
+    <string name="invalid_email">Email Address Invalid</string>
+    <string name="invalid_name">Enter proper name</string>
+    <string name="invalid_dob">Enter valid date</string>
+    <string name="invalid_phone">Enter valid phone number</string>
 </resources>
