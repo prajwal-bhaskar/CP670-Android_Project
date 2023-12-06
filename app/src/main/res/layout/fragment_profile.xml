@@ -153,6 +153,15 @@
         android:textSize="30sp"
         android:text="Email: "
         android:padding="8dp" />
+
+        <Button
+            android:id="@+id/logoutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Log Out"
+            android:padding="8dp"
+            android:layout_marginTop="16dp" />
 </LinearLayout>
 
 

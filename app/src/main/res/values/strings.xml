@@ -28,4 +28,5 @@
     <string name="invalid_name">Enter proper name</string>
     <string name="invalid_dob">Enter valid date</string>
     <string name="invalid_phone">Enter valid phone number</string>
+    <string name="search_hint">Search for Events</string>
 </resources>

@@ -8,10 +8,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+import androidx.lifecycle.Observer;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,26 +21,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.event_management.Event;
 import com.example.event_management.EventBookingActivity;
 import com.example.event_management.R;
-import com.example.event_management.databinding.FragmentEventsBinding;
-import com.example.event_management.ui.favourites.FavoriteAdapter;
-import com.example.event_management.ui.favourites.FavouritesViewModel;
+import com.example.event_management.SharedViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EventsFragment extends Fragment {
 
-    private FragmentEventsBinding binding;
     private EventViewModel eventViewModel;
-    private FavouritesViewModel favouritesViewModel;
     private EventAdapter eventAdapter;
-    private FavoriteAdapter favoriteAdapter;
-    private FavoriteAdapter.OnItemClickListener onItemClickListener;
+    private SharedViewModel sharedViewModel;
+    private EventRepository eventRepository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         eventViewModel = new ViewModelProvider(requireActivity()).get(EventViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        eventRepository = new EventRepository();
         setHasOptionsMenu(true);
     }
 
@@ -47,30 +48,38 @@ public class EventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
 
         RecyclerView recyclerView = view.findViewById(R.id.eventsRecyclerView);
-        EventAdapter.OnItemClickListener onItemClickListener = new EventAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Event event) {
-                // Handle item click here
-                Intent intent = new Intent(getContext(), EventDescriptionActivity.class);
-                intent.putExtra("EVENT", event);
-                startActivity(intent);
-            }
-        };
-        eventAdapter = new EventAdapter(new ArrayList<Event>(), eventViewModel ,onItemClickListener, favoriteAdapter);
 
+        EventAdapter.OnItemClickListener onItemClickListener = event -> {
+            // Handle item click here
+            Intent intent = new Intent(getContext(), EventDescriptionActivity.class);
+            intent.putExtra("EVENT", event);
+            startActivity(intent);
+        };
+
+        eventAdapter = new EventAdapter(onItemClickListener,eventRepository);
         recyclerView.setAdapter(eventAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Observe changes to the LiveData and update the UI when data changes
         eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), new Observer<List<Event>>() {
             @Override
             public void onChanged(List<Event> updatedEvents) {
                 eventAdapter.setEvents(updatedEvents);
-                eventAdapter.notifyDataSetChanged();  // Notify the adapter when data changes
             }
         });
 
+        sharedViewModel.getLoggedIn().observe(getViewLifecycleOwner(), isLoggedIn -> {
+            requireActivity().invalidateOptionsMenu();
+        });
+
         return view;
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        MenuItem postItem = menu.findItem(R.id.action_post);
+        postItem.setVisible(user != null);
     }
 
     @Override
@@ -89,15 +98,7 @@ public class EventsFragment extends Fragment {
     }
 
     private void navigateToEventBooking() {
-        // Logic to navigate to Event Booking Activity
         Intent intent = new Intent(getActivity(), EventBookingActivity.class);
         startActivity(intent);
-    }
-
-    private void observeEvents() {
-        eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), allEvents -> {
-            eventAdapter.setEvents(allEvents);
-            // You may need to call notifyDataSetChanged() on the adapter
-        });
     }
 }

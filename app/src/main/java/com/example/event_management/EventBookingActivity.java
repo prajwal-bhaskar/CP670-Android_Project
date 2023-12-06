@@ -18,6 +18,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.HashMap;
+import java.util.Map;
 
 public class EventBookingActivity extends AppCompatActivity {
 
@@ -26,12 +28,14 @@ public class EventBookingActivity extends AppCompatActivity {
     private Button submitButton, selectImageButton;
     private DatabaseReference databaseReference;
     private static final int PICK_IMAGE_REQUEST = 1;
+    private Uri imageUri;
     private String imageUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_booking);
+        setTitle("New Event");
 
         eventNameEditText = findViewById(R.id.eventName);
         eventDateEditText = findViewById(R.id.eventDate);
@@ -44,18 +48,16 @@ public class EventBookingActivity extends AppCompatActivity {
 
         databaseReference = FirebaseDatabase.getInstance().getReference("events");
 
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (imageUri != null) {
-                    uploadImageToFirebase(imageUri);
-                } else {
-                    submitEvent();
-                }
+        selectImageButton.setOnClickListener(v -> selectImage());
+
+        submitButton.setOnClickListener(v -> {
+            if (imageUri != null) {
+                uploadImageToFirebase(imageUri);
+            } else {
+                submitEvent(""); // Call with empty string if no image
             }
         });
     }
-
-    private Uri imageUri;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -73,20 +75,18 @@ public class EventBookingActivity extends AppCompatActivity {
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
+
     private void uploadImageToFirebase(Uri imageUri) {
         if (imageUri != null) {
             StorageReference fileReference = FirebaseStorage.getInstance().getReference("uploads")
                     .child(System.currentTimeMillis() + "." + getFileExtension(imageUri));
 
             fileReference.putFile(imageUri)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                            String imageUrl = uri.toString();
-                        });
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(EventBookingActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+                    .addOnSuccessListener(taskSnapshot -> fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                        imageUrl = uri.toString();
+                        submitEvent(imageUrl); // Call submitEvent with imageUrl
+                    }))
+                    .addOnFailureListener(e -> Toast.makeText(EventBookingActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
         }
     }
 
@@ -96,18 +96,27 @@ public class EventBookingActivity extends AppCompatActivity {
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
     }
 
-    private void submitEvent() {
+    private void submitEvent(String imagePath) {
         String name = eventNameEditText.getText().toString().trim();
         String date = eventDateEditText.getText().toString().trim();
         String time = eventTimeEditText.getText().toString().trim();
         String description = eventDescriptionEditText.getText().toString().trim();
         int maxAttendees = Integer.parseInt(maxAttendeesEditText.getText().toString().trim());
-        String imagePath = imageUrl != null ? imageUrl : "";
+        Map<String, Boolean> joinedUsers = new HashMap<>();
 
-        Event event = new Event(name, date, description, time,imagePath, maxAttendees);
+        // Get a new unique key from Firebase Database
+        String eventId = databaseReference.push().getKey();
+        Event event = new Event(eventId,name, date, description, time, imagePath, maxAttendees);
+        event.setJoinedUsers(joinedUsers);
+        event.setId(eventId); // Set the event ID
 
-        databaseReference.push().setValue(event)
-                .addOnSuccessListener(aVoid -> Toast.makeText(EventBookingActivity.this, "Event booked successfully!", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(EventBookingActivity.this, "Failed to book event.", Toast.LENGTH_SHORT).show());
+        if (eventId != null) {
+            databaseReference.child(eventId).setValue(event)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(EventBookingActivity.this, "Event booked successfully!", Toast.LENGTH_SHORT).show();
+                        finish(); // Finish this activity and go back to the previous one (EventsFragment)
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(EventBookingActivity.this, "Failed to book event.", Toast.LENGTH_SHORT).show());
+        }
     }
 }

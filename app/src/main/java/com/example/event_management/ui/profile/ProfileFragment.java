@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.example.event_management.SharedViewModel;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -57,13 +58,14 @@ public class ProfileFragment extends Fragment {
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
     private FragmentProfileBinding binding;
+    private SharedViewModel sharedViewModel;
     private static final int RC_SIGN_IN = 9001;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         mAuth = FirebaseAuth.getInstance();
         setupGoogleSignIn();
 
@@ -71,6 +73,9 @@ public class ProfileFragment extends Fragment {
             String email = binding.username.getText().toString();
             String password = binding.password.getText().toString();
             attemptLogin(email, password);
+        });
+        binding.logoutButton.setOnClickListener(v -> {
+            signOut();
         });
 
         binding.signup.setOnClickListener(v -> {
@@ -144,6 +149,7 @@ public class ProfileFragment extends Fragment {
                 .addOnCompleteListener(requireActivity(), task -> {
                     if (task.isSuccessful()) {
                         // Login success
+                        sharedViewModel.setLoggedIn(true);
                         FirebaseUser user = mAuth.getCurrentUser();
                         updateUiWithUser(new LoggedInUserView(user.getDisplayName()));
                         displayUserProfile(user);
@@ -189,6 +195,7 @@ public class ProfileFragment extends Fragment {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(requireActivity(), task -> {
                     if (task.isSuccessful()) {
+                        sharedViewModel.setLoggedIn(true);
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
                             // Save additional information to Firebase Database/Firestore
@@ -224,10 +231,12 @@ public class ProfileFragment extends Fragment {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(requireActivity(), task -> {
                     if (task.isSuccessful()) {
+                        sharedViewModel.setLoggedIn(true);
                         // Sign in success, update UI with the signed-in user's information
                         FirebaseUser user = mAuth.getCurrentUser();
                         assert user != null;
                         updateUiWithUser(new LoggedInUserView(user.getDisplayName()));
+                        displayUserProfile(user);
                         // TODO: Navigate to the next screen or update the current UI
                     } else {
                         // If sign in fails, display a message to the user.
@@ -245,8 +254,6 @@ public class ProfileFragment extends Fragment {
         // Show user's profile information
         binding.userProfileLayout.setVisibility(View.VISIBLE);
 
-
-        Toast.makeText(getContext(), "Welcome " + model.getDisplayName(), Toast.LENGTH_LONG).show();
     }
 
 
@@ -389,6 +396,7 @@ public class ProfileFragment extends Fragment {
             binding.userProfileLayout.setVisibility(View.GONE);
             binding.loginForm.setVisibility(View.VISIBLE);
         });
+        sharedViewModel.setLoggedIn(false);
     }
 
 
