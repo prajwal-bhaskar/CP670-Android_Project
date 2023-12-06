@@ -5,6 +5,7 @@ import android.util.Log;
 import com.example.event_management.Event;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.example.event_management.ui.events.EventRepository;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
@@ -15,6 +16,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class EventRepository {
     private DatabaseReference eventsRef;
@@ -26,7 +28,16 @@ public class EventRepository {
     public void addEvent(Event event) {
         // Add event to the database
         String eventId = eventsRef.push().getKey();
-        eventsRef.child(eventId).setValue(event);
+        if (eventId != null) {
+            eventsRef.child(eventId).setValue(event);
+        }
+    }
+
+    public void updateEventJoinStatus(String eventId, Map<String, Boolean> joinedUsers) {
+        // Update the join status of the event
+        if (eventId != null) {
+            eventsRef.child(eventId).child("joinedUsers").setValue(joinedUsers);
+        }
     }
 
     public LiveData<List<Event>> getEventsLiveData() {
@@ -41,6 +52,7 @@ public class EventRepository {
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                         Event event = dataSnapshot.getValue(Event.class);
                         if (event != null) {
+                            event.setId(dataSnapshot.getKey());
                             events.add(event);
                         }
                     }

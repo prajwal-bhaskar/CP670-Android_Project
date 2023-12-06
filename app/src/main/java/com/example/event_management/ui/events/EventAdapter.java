@@ -6,28 +6,35 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.event_management.Event;
 import com.example.event_management.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
     private List<Event> events;
     private OnItemClickListener onItemClickListener;
+    private EventRepository eventRepository;
 
     public interface OnItemClickListener {
         void onItemClick(Event event);
     }
 
-    public EventAdapter(OnItemClickListener onItemClickListener) {
+    public EventAdapter(OnItemClickListener onItemClickListener,EventRepository eventRepository) {
         this.events = new ArrayList<>();
         this.onItemClickListener = onItemClickListener;
+        this.eventRepository = eventRepository;
     }
 
     public void setEvents(List<Event> events) {
@@ -47,22 +54,19 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         holder.eventTitleTextView.setText(event.getTitle());
         holder.eventDateTextView.setText(event.getDate());
         holder.eventDescriptionTextView.setText(event.getDescription());
         holder.eventTimeTextView.setText(event.getTime());
-        holder.eventMaxAttendeesTextView.setText(String.valueOf(event.getMaxAttendees()));
+        String max_Attendees_Text = "Max Attendees: "+ String.valueOf(event.getMaxAttendees());
+        holder.eventMaxAttendeesTextView.setText(max_Attendees_Text);
         Glide.with(holder.itemView.getContext())
                 .load(event.getImageUrl())
                 .into(holder.eventImageView);
 
         // Check if the event is joined or favorited and update UI accordingly
-        if (event.isJoined()) {
-            holder.joinButton.setText("Leave");
-        } else {
-            holder.joinButton.setText("Join");
-        }
 
         if (event.isFavorited()) {
             holder.favoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_fav_light, 0, 0, 0);
@@ -70,13 +74,24 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             holder.favoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_fav_dark, 0, 0, 0);
         }
 
+        updateJoinButton(holder.joinButton, event, currentUser);
+
         holder.joinButton.setOnClickListener(v -> {
-            event.setJoined(!event.isJoined());
-            notifyItemChanged(position);
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClick(event);
+            if (currentUser != null) {
+                boolean isJoined = event.getJoinedUsers().getOrDefault(currentUser.getUid(), false);
+                event.getJoinedUsers().put(currentUser.getUid(), !isJoined);
+                event.setJoined(!isJoined);
+                notifyItemChanged(position);
+                if (onItemClickListener != null) {
+                    onItemClickListener.onItemClick(event);
+                }
+                // Update the event in Firebase
+                eventRepository.updateEventJoinStatus(event.getId(), event.getJoinedUsers());
+            } else {
+                Toast.makeText(holder.itemView.getContext(), "Please sign in to join the event", Toast.LENGTH_SHORT).show();
             }
         });
+
 
         holder.favoriteButton.setOnClickListener(v -> {
             event.setFavorited(!event.isFavorited());
@@ -87,6 +102,13 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         });
     }
 
+    private void updateJoinButton(Button joinButton, Event event, FirebaseUser currentUser) {
+        if (currentUser != null && event.getJoinedUsers().containsKey(currentUser.getUid())) {
+            joinButton.setText(Boolean.TRUE.equals(event.getJoinedUsers().get(currentUser.getUid())) ? "Leave" : "Join");
+        } else {
+            joinButton.setText("Join");
+        }
+    }
     @Override
     public int getItemCount() {
         return events.size();

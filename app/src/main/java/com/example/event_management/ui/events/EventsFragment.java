@@ -8,13 +8,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
+import androidx.lifecycle.Observer;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.event_management.Event;
 import com.example.event_management.EventBookingActivity;
 import com.example.event_management.R;
+import com.example.event_management.SharedViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -31,11 +31,15 @@ public class EventsFragment extends Fragment {
 
     private EventViewModel eventViewModel;
     private EventAdapter eventAdapter;
+    private SharedViewModel sharedViewModel;
+    private EventRepository eventRepository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         eventViewModel = new ViewModelProvider(requireActivity()).get(EventViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        eventRepository = new EventRepository();
         setHasOptionsMenu(true);
     }
 
@@ -52,36 +56,32 @@ public class EventsFragment extends Fragment {
             startActivity(intent);
         };
 
-        eventAdapter = new EventAdapter(onItemClickListener);
-
+        eventAdapter = new EventAdapter(onItemClickListener,eventRepository);
         recyclerView.setAdapter(eventAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Observe changes to the LiveData and update the UI when data changes
         eventViewModel.getEventsLiveData().observe(getViewLifecycleOwner(), new Observer<List<Event>>() {
             @Override
             public void onChanged(List<Event> updatedEvents) {
                 eventAdapter.setEvents(updatedEvents);
-                eventAdapter.notifyDataSetChanged();  // Notify the adapter when data changes
             }
         });
 
-
-
-
-        // Here, you should retrieve events from Firebase or another data source and set them in the ViewModel
-        // Example: eventViewModel.setEvents(yourEventList);
-
-
-        // You can also handle errors or empty data
-        //if (eventViewModel.getEventsLiveData().getValue() == null || eventViewModel.getEventsLiveData().getValue().isEmpty()) {
-            //Toast.makeText(requireContext(), "No events found.", Toast.LENGTH_SHORT).show();
-        //}
-
-
+        sharedViewModel.getLoggedIn().observe(getViewLifecycleOwner(), isLoggedIn -> {
+            requireActivity().invalidateOptionsMenu();
+        });
 
         return view;
     }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        MenuItem postItem = menu.findItem(R.id.action_post);
+        postItem.setVisible(user != null);
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_events, menu);
@@ -96,8 +96,8 @@ public class EventsFragment extends Fragment {
         }
         return super.onOptionsItemSelected(item);
     }
+
     private void navigateToEventBooking() {
-        // Logic to navigate to Event Booking Activity
         Intent intent = new Intent(getActivity(), EventBookingActivity.class);
         startActivity(intent);
     }

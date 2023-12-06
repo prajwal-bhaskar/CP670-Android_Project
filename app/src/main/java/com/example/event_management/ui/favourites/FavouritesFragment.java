@@ -18,6 +18,7 @@ import com.example.event_management.R;
 import com.example.event_management.databinding.FragmentFavouritesBinding;
 import com.example.event_management.ui.events.EventAdapter;
 import com.example.event_management.ui.events.EventDescriptionActivity;
+import com.example.event_management.ui.events.EventRepository;
 import com.example.event_management.ui.events.EventViewModel;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.List;
 
 public class FavouritesFragment extends Fragment {
     private EventViewModel eventViewModel;
+    private EventRepository eventRepository;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +43,7 @@ public class FavouritesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentFavouritesBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        eventRepository = new EventRepository();
 
         RecyclerView favoritesRecyclerView = root.findViewById(R.id.text_favourites);
 
@@ -54,7 +57,7 @@ public class FavouritesFragment extends Fragment {
             }
         };
 
-        EventAdapter eventAdapter = new EventAdapter(onItemClickListener);
+        EventAdapter eventAdapter = new EventAdapter(onItemClickListener,eventRepository);
         favoritesRecyclerView.setAdapter(eventAdapter);
         favoritesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

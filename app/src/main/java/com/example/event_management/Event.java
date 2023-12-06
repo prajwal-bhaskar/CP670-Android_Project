@@ -7,7 +7,12 @@ import androidx.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Event implements Parcelable {
+    private String id;
     private String title;
     private String date;
     private String description;
@@ -17,26 +22,32 @@ public class Event implements Parcelable {
     private boolean isJoined;
     private boolean isFavorited;
 
+    private Map<String, Boolean> joinedUsers;
+
     // Default image URL - replace with the actual URL of your default image in Firebase Storage
     private static final String DEFAULT_IMAGE_URL = "https://firebasestorage.googleapis.com/v0/b/cp670-eventmanagement.appspot.com/o/default.jpg?alt=media&token=33027533-9a73-48ef-b276-5536e8056308";
 
     // No-argument constructor for Firebase
     public Event() {
         this.imageUrl = DEFAULT_IMAGE_URL;
+        this.joinedUsers = new HashMap<>();
     }
 
     // Constructor with image URL
-    public Event(String title, String date, String description, String time, String imageUrl, int maxAttendees) {
+    public Event(String id,String title, String date, String description, String time, String imageUrl, int maxAttendees) {
+        this.id = id;
         this.title = title;
         this.date = date;
         this.description = description;
         this.time = time;
         this.maxAttendees = maxAttendees;
         this.imageUrl = imageUrl != null ? imageUrl : DEFAULT_IMAGE_URL;
+        this.joinedUsers = new HashMap<>();
     }
 
     // Parcelable implementation
     protected Event(Parcel in) {
+        id = in.readString();
         title = in.readString();
         date = in.readString();
         description = in.readString();
@@ -45,6 +56,13 @@ public class Event implements Parcelable {
         maxAttendees = in.readInt();
         isJoined = in.readByte() != 0;
         isFavorited = in.readByte() != 0;
+        Object readObject = in.readSerializable();
+        if (readObject instanceof HashMap<?, ?>) {
+            //noinspection unchecked
+            joinedUsers = (HashMap<String, Boolean>) readObject;
+        } else {
+            joinedUsers = new HashMap<>();
+        }
     }
 
     public static final Creator<Event> CREATOR = new Creator<Event>() {
@@ -80,6 +98,15 @@ public class Event implements Parcelable {
         return time;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    // Setter for id
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public int getMaxAttendees(){return maxAttendees;}
 
     public void setImageUrl(String imageUrl) {
@@ -106,16 +133,24 @@ public class Event implements Parcelable {
     public int describeContents() {
         return 0;
     }
+    public Map<String, Boolean> getJoinedUsers() {
+        return joinedUsers;
+    }
+
+    public void setJoinedUsers(Map<String, Boolean> joinedUsers) {
+        this.joinedUsers = joinedUsers;
+    }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
         dest.writeString(title);
         dest.writeString(date);
         dest.writeString(description);
         dest.writeString(imageUrl);
         dest.writeString(time);
         dest.writeInt(maxAttendees);
-        dest.writeByte((byte) (isJoined ? 1 : 0));
         dest.writeByte((byte) (isFavorited ? 1 : 0));
+        dest.writeSerializable((Serializable) joinedUsers);
     }
 }
