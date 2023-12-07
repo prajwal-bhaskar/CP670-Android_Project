@@ -133,6 +133,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             eventImageView = itemView.findViewById(R.id.eventImage);
             eventTimeTextView = itemView.findViewById(R.id.timeTextView);
             eventMaxAttendeesTextView = itemView.findViewById(R.id.maxAttendeesTextView);
+            joinButton = itemView.findViewById(R.id.joinButton);
+            favoriteButton = itemView.findViewById(R.id.favoriteButton);
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION && onItemClickListener != null) {
@@ -140,8 +142,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 }
             });
 
-            joinButton = itemView.findViewById(R.id.joinButton);
-            favoriteButton = itemView.findViewById(R.id.favoriteButton);
+
         }
     }
 }

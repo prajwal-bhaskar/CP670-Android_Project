@@ -26,6 +26,7 @@ public class Event implements Parcelable {
 
     // Default image URL - replace with the actual URL of your default image in Firebase Storage
     private static final String DEFAULT_IMAGE_URL = "https://firebasestorage.googleapis.com/v0/b/cp670-eventmanagement.appspot.com/o/default.jpg?alt=media&token=33027533-9a73-48ef-b276-5536e8056308";
+    private float rating;
 
     // No-argument constructor for Firebase
     public Event() {
@@ -140,7 +141,13 @@ public class Event implements Parcelable {
     public void setJoinedUsers(Map<String, Boolean> joinedUsers) {
         this.joinedUsers = joinedUsers;
     }
+    public float getRating() {
+        return rating;
+    }
 
+    public void setRating(float rating) {
+        this.rating = rating;
+    }
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);

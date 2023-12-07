@@ -1,5 +1,6 @@
 package com.example.event_management;
 
+import android.app.DatePickerDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
@@ -18,18 +19,23 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class EventBookingActivity extends AppCompatActivity {
 
-    private EditText eventNameEditText, eventDateEditText, eventTimeEditText, eventDescriptionEditText, maxAttendeesEditText;
+    private EditText eventNameEditText, eventTimeEditText, eventDescriptionEditText, maxAttendeesEditText;
     private ImageView eventImageView;
-    private Button submitButton, selectImageButton;
+    private Button submitButton, selectImageButton, eventDateButton;
     private DatabaseReference databaseReference;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
-    private String imageUrl;
+    private String imageUrl, selectedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +44,8 @@ public class EventBookingActivity extends AppCompatActivity {
         setTitle("New Event");
 
         eventNameEditText = findViewById(R.id.eventName);
-        eventDateEditText = findViewById(R.id.eventDate);
+        eventDateButton = findViewById(R.id.chooseDateButton);
+        eventDateButton.setOnClickListener(this::showDatePickerDialog);
         eventTimeEditText = findViewById(R.id.eventTime);
         eventDescriptionEditText = findViewById(R.id.eventDescription);
         maxAttendeesEditText = findViewById(R.id.maxAttendees);
@@ -95,10 +102,25 @@ public class EventBookingActivity extends AppCompatActivity {
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
     }
+    private void showDatePickerDialog(View view) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (datePicker, selectedYear, selectedMonth, selectedDay) -> {
+                    selectedDate = String.format(Locale.getDefault(), "dd/MM/yyyy", selectedDay, selectedMonth + 1, selectedYear);
+                    eventDateButton.setText(selectedDate); // Update the button text with the selected date
+                },
+                day, month, year);
+
+        datePickerDialog.show();
+    }
     private void submitEvent(String imagePath) {
         String name = eventNameEditText.getText().toString().trim();
-        String date = eventDateEditText.getText().toString().trim();
+        String date = selectedDate;
         String time = eventTimeEditText.getText().toString().trim();
         String description = eventDescriptionEditText.getText().toString().trim();
         int maxAttendees = Integer.parseInt(maxAttendeesEditText.getText().toString().trim());
@@ -119,4 +141,6 @@ public class EventBookingActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> Toast.makeText(EventBookingActivity.this, "Failed to book event.", Toast.LENGTH_SHORT).show());
         }
     }
+
+
 }

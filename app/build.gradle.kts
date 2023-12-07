@@ -56,14 +56,12 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.navigation:navigation-fragment:2.7.5")
     implementation("androidx.navigation:navigation-ui:2.7.5")
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.22"))
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.21"))
     implementation("androidx.annotation:annotation:1.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("com.google.android.gms:play-services-base:18.2.0")
-    implementation("com.facebook.android:facebook-login:14.0.0")
-
-
+    implementation("com.facebook.android:facebook-login:16.2.0")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -71,7 +69,7 @@ dependencies {
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.mockito:mockito-core:5.6.0")
+    testImplementation("org.mockito:mockito-core:5.8.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }

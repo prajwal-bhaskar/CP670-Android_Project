@@ -74,6 +74,13 @@ public class NotificationsFragment extends Fragment {
     }
 
     private void updateUIWithJoinedEvents(List<Event> events) {
+        if (binding == null) {
+            // Fragment is destroyed, do nothing
+            return;
+        }
+
+        TextView textNotifications = binding.textNotifications;
+
         if (events.isEmpty()) {
             binding.textNotifications.setText("No Events Joined");
         } else {
